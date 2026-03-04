@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hotel New Kishan – Order Online</title>
+  <meta name="description" content="Hotel New Kishan – Authentic Indian Cuisine. Dine-in or Home Delivery." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+  <a href="/admin" class="admin-link-btn">⚙️ Admin</a>
+
+  <!-- ══ HERO ══════════════════════════════════════════════ -->
+  <div class="hero">
+    <img src="images/hotel_banner.png" alt="Hotel New Kishan" class="hero-img" />
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hotel-stars">★ ★ ★ ★ ★</div>
+      <h1 class="hotel-name">Hotel New Kishan</h1>
+      <p class="hotel-tagline">AUTHENTIC INDIAN CUISINE &nbsp;·&nbsp; EST. 1995</p>
+      <div class="hotel-address-bar" id="address-bar">
+        <span>📍 <span id="hotel-address-text">Loading...</span></span>
+        <span>📞 <span id="hotel-phone-text">9665843401</span></span>
+        <span>👨‍🍳 Owner: Mr. Kuldip Khairnar</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STICKY NAV ═════════════════════════════════════════ -->
+  <div class="sticky-nav hidden" id="sticky-nav">
+    <span class="mode-badge" id="mode-badge"></span>
+    <div class="type-tabs">
+      <button class="type-btn active" id="veg-btn" onclick="switchType('veg')">🟢 Veg</button>
+      <button class="type-btn" id="nonveg-btn" onclick="switchType('nonveg')">🔴 Non-Veg</button>
+    </div>
+    <button class="cart-bubble" onclick="toggleCartPanel()">
+      🛒 <span class="cart-count-badge" id="cart-count">0</span>
+    </button>
+  </div>
+
+  <!-- ══ MODE SELECTOR ══════════════════════════════════════ -->
+  <div class="mode-section" id="mode-section">
+    <div class="mode-wrapper">
+      <h2 class="mode-title">Welcome! 🙏</h2>
+      <p class="mode-subtitle">How would you like to order?</p>
+      <div class="mode-cards">
+        <div class="mode-card" onclick="selectMode('dinein')">
+          <div class="mode-card-icon">🍽️</div>
+          <div class="mode-card-title">Dine-In Order</div>
+          <div class="mode-card-desc">Order from your table – goes directly to the kitchen!</div>
+        </div>
+        <div class="mode-card" onclick="selectMode('delivery')">
+          <div class="mode-card-icon">🛵</div>
+          <div class="mode-card-title">Home Delivery</div>
+          <div class="mode-card-desc">Order from home – confirmed via WhatsApp</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MENU SECTION ════════════════════════════════════════ -->
+  <div class="menu-section hidden" id="menu-section">
+    <div class="section-banner">
+      <img src="images/veg_food.png" alt="Food" id="banner-img" />
+      <div class="section-banner-overlay">
+        <div class="section-banner-text">
+          <h2 id="banner-title">🟢 Vegetarian Menu</h2>
+          <p id="banner-desc">Fresh, flavorful & 100% vegetarian dishes</p>
+        </div>
+      </div>
+    </div>
+    <div id="menu-container">
+      <div style="text-align:center;padding:60px;">
+        <div class="loader"></div>
+        <p style="margin-top:16px;color:var(--text-muted);">Loading menu...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CART ═══════════════════════════════════════════════ -->
+  <div class="cart-section hidden" id="cart-section">
+    <div class="cart-panel" id="cart-panel">
+      <div class="cart-panel-title">🛒 Your Order</div>
+      <div id="cart-items-list">
+        <p class="empty-cart">Cart is empty</p>
+      </div>
+      <button class="btn-place-order" onclick="placeOrder()" style="width:100%;margin-top:16px;">
+        ✅ Place Order
+      </button>
+    </div>
+    <div class="cart-bar">
+      <div class="cart-summary">
+        <div class="cart-total-label">Total Amount</div>
+        <div class="cart-total-value" id="cart-total">₹0</div>
+      </div>
+      <button class="btn-place-order" onclick="placeOrder()">🛒 Place Order</button>
+    </div>
+  </div>
+
+  <!-- ══ TABLE MODAL ════════════════════════════════════════ -->
+  <div class="modal-backdrop hidden" id="table-modal">
+    <div class="modal-box">
+      <div class="modal-title">🍽️ Dine-In Order</div>
+      <p class="modal-subtitle">Enter your table number to continue</p>
+      <div class="form-group">
+        <label class="form-label">Table Number *</label>
+        <input type="number" id="table-input" class="form-input" placeholder="e.g. 5" min="1" max="50"
+          onkeydown="if(event.key==='Enter') confirmTable()" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('table-modal')">Back</button>
+        <button class="btn-primary" onclick="confirmTable()">Continue →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DELIVERY MODAL ════════════════════════════════════ -->
+  <div class="modal-backdrop hidden" id="delivery-modal">
+    <div class="modal-box">
+      <div class="modal-title">🛵 Home Delivery</div>
+      <p class="modal-subtitle">Order will be confirmed via WhatsApp</p>
+      <div class="form-group">
+        <label class="form-label">Your Name *</label>
+        <input type="text" id="del-name" class="form-input" placeholder="Full name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" id="del-phone" class="form-input" placeholder="e.g. 9876543210" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Delivery Address *</label>
+        <textarea id="del-address" class="form-input" rows="3" placeholder="Full address..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('delivery-modal')">Back</button>
+        <button class="btn-primary" onclick="confirmDelivery()">Continue →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ORDER STATUS TRACKER ═══════════════════════════════ -->
+  <div class="order-tracker-overlay hidden" id="tracker-overlay">
+    <div class="tracker-box">
+      <div style="font-size:52px;">🎉</div>
+      <h2 class="tracker-title">Order Placed!</h2>
+      <p class="tracker-subtitle">Your food is being prepared. Track your order below.</p>
+
+      <div class="tracker-card">
+        <div class="tracker-row"><span>Order ID</span> <strong id="tr-order-id">-</strong></div>
+        <div class="tracker-row"><span>Order Type</span><strong id="tr-type">-</strong></div>
+        <div class="tracker-row"><span>Total</span> <strong id="tr-total" style="color:var(--gold-dark);">-</strong>
+        </div>
+        <div class="tracker-row"><span>Items</span> <span id="tr-items"
+            style="font-size:12px;text-align:right;max-width:60%;">-</span></div>
+      </div>
+
+      <!-- Status Timeline -->
+      <div class="status-timeline" id="status-timeline">
+        <div class="status-step">
+          <div class="status-icon" id="st-pending">⏳</div>
+          <div class="status-label" id="sl-pending">Received</div>
+        </div>
+        <div class="status-step">
+          <div class="status-icon" id="st-preparing">👨‍🍳</div>
+          <div class="status-label" id="sl-preparing">Preparing</div>
+        </div>
+        <div class="status-step">
+          <div class="status-icon" id="st-ready">🔔</div>
+          <div class="status-label" id="sl-ready">Ready</div>
+        </div>
+        <div class="status-step">
+          <div class="status-icon" id="st-done">✅</div>
+          <div class="status-label" id="sl-done">Done!</div>
+        </div>
+      </div>
+
+      <p id="tr-status-msg" style="font-size:14px;color:var(--text-muted);margin:16px 0 24px;font-weight:500;">
+        Checking order status...
+      </p>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn-primary" onclick="closeTracker()" style="padding:14px;">🛒 Order More</button>
+        <a href="https://wa.me/919665843401" target="_blank" class="btn-whatsapp-small">📞 Call / WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ THANK YOU (Delivery) ═══════════════════════════════ -->
+  <div class="thankyou-overlay hidden" id="thankyou-overlay">
+    <div id="confetti-container"></div>
+    <div class="thankyou-box">
+      <div class="ty-icon">🎉</div>
+      <h1 class="ty-title">Thank You!</h1>
+      <p class="ty-subtitle">Your delivery order has been placed!</p>
+      <div class="ty-card">
+        <div class="ty-row"><span>Order ID</span> <strong id="ty-order-id">-</strong></div>
+        <div class="ty-row"><span>Status</span> <strong id="ty-detail" style="color:var(--veg);">-</strong></div>
+        <div class="ty-row"><span>Total</span> <strong id="ty-total" style="color:var(--gold-dark);">-</strong></div>
+      </div>
+      <p class="ty-message">
+        Our team will prepare your food immediately.<br />
+        Thank you for choosing <strong>Hotel New Kishan</strong>!
+      </p>
+      <div class="ty-actions">
+        <button class="btn-primary" onclick="closeThankYou()" style="padding:14px;font-size:16px;">🛒 Order
+          More</button>
+        <a href="https://wa.me/919665843401" target="_blank" class="btn-whatsapp-small">📞 Call / WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/menu.js"></script>
+</body>
+
+</html>
