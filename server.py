@@ -4,16 +4,35 @@ Owner: Mr. Kuldip Khairnar
 """
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
-import json, os, time
+import json, os, time, shutil
 from datetime import datetime
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
 BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
-MENU_FILE     = os.path.join(BASE_DIR, 'db', 'menu.json')
-ORDERS_FILE   = os.path.join(BASE_DIR, 'db', 'orders.json')
-SETTINGS_FILE = os.path.join(BASE_DIR, 'db', 'settings.json')
+
+# On Render, filesystem is read-only except /tmp/
+# We copy db files to /tmp/ on first run so they are writable
+IS_RENDER = os.environ.get('RENDER', False)
+WRITE_DIR = '/tmp/sai_kisan_db' if IS_RENDER else os.path.join(BASE_DIR, 'db')
+
+def init_db():
+    """Copy db files to writable /tmp dir on Render (only first time)"""
+    if not IS_RENDER:
+        return
+    os.makedirs(WRITE_DIR, exist_ok=True)
+    for fname in ['menu.json', 'orders.json', 'settings.json']:
+        src = os.path.join(BASE_DIR, 'db', fname)
+        dst = os.path.join(WRITE_DIR, fname)
+        if not os.path.exists(dst):
+            shutil.copy2(src, dst)
+
+init_db()
+
+MENU_FILE     = os.path.join(WRITE_DIR, 'menu.json')
+ORDERS_FILE   = os.path.join(WRITE_DIR, 'orders.json')
+SETTINGS_FILE = os.path.join(WRITE_DIR, 'settings.json')
 
 # ── DB helpers ────────────────────────────────────────────────
 def read_json(path):
