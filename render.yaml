@@ -1,7 +1,19 @@
 services:
   - type: web
     name: hotel-new-kishan
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn server:app --timeout 120
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
     plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: OWNER_SECRET_CODE
+        sync: false
