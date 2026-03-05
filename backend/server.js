@@ -14,6 +14,7 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/menu', require('./routes/menu'));
 app.use('/api/orders', require('./routes/orders'));
+app.use('/api/reviews', require('./routes/reviews'));
 
 // ── Health Check ─────────────────────────────────────────────
 app.get('/api/health', (_, res) => res.json({ ok: true, hotel: 'Hotel New Kishan', owner: 'Mr. Kuldip Khairnar' }));

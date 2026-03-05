@@ -197,6 +197,13 @@ body {
     display: flex;
     gap: 0;
     padding: 0 28px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.admin-tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .admin-tab-btn {
@@ -644,6 +651,7 @@ body {
     border-radius: 16px;
     padding: 28px;
     max-width: 480px;
+    width: 100%;
     margin-bottom: 20px;
     box-shadow: var(--shadow-sm);
 }
@@ -795,11 +803,11 @@ body {
 
 @media (max-width:768px) {
     .stats-bar {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
     }
 
     .admin-panel {
-        padding: 16px;
+        padding: 14px;
     }
 
     .admin-items-grid {
@@ -807,7 +815,28 @@ body {
     }
 
     .admin-header {
-        flex-direction: column;
-        gap: 10px;
+        padding: 10px 14px;
+        gap: 8px;
+    }
+
+    .admin-tab-btn {
+        padding: 12px 16px;
+        font-size: 13px;
+    }
+
+    /* Settings: full-width on mobile so no bare background showing */
+    .settings-card {
+        max-width: 100%;
+        padding: 20px 16px;
+        border-radius: 12px;
+    }
+
+    #panel-settings {
+        background: var(--bg);
+        min-height: 100vh;
+    }
+
+    .modal-box {
+        padding: 24px 18px;
     }
 }

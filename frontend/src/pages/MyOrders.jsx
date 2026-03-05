@@ -13,8 +13,142 @@ const STATUS_INFO = {
     cancelled: { label: 'Cancelled', emoji: '❌', color: '#e74c3c', bg: '#fdecea' },
 };
 
-function OrderCard({ order }) {
+// ── Star Rating Component ──────────────────────────────────────
+function StarRating({ value, onChange }) {
+    const [hovered, setHovered] = useState(0);
+    return (
+        <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', margin: '8px 0' }}>
+            {[1, 2, 3, 4, 5].map(star => (
+                <span
+                    key={star}
+                    onClick={() => onChange && onChange(star)}
+                    onMouseEnter={() => onChange && setHovered(star)}
+                    onMouseLeave={() => onChange && setHovered(0)}
+                    style={{
+                        fontSize: '32px',
+                        cursor: onChange ? 'pointer' : 'default',
+                        color: (hovered || value) >= star ? '#f39c12' : '#ddd',
+                        transition: 'color 0.15s',
+                        userSelect: 'none',
+                    }}
+                >★</span>
+            ))}
+        </div>
+    );
+}
+
+// ── Review Modal ───────────────────────────────────────────────
+function ReviewModal({ order, onClose, onSubmitted }) {
+    const [rating, setRating] = useState(0);
+    const [comment, setComment] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSubmit = async () => {
+        if (rating === 0) { setError('Pehle rating select karein ⭐'); return; }
+        setLoading(true);
+        setError('');
+        try {
+            await axios.post('/reviews', { orderId: order._id, rating, comment });
+            onSubmitted();
+            onClose();
+        } catch (e) {
+            setError(e.response?.data?.error || 'Kuch gadbad hui, dobara try karein');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1000, padding: '16px',
+        }}
+            onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+        >
+            <div style={{
+                background: '#fff', borderRadius: '20px', padding: '32px 28px',
+                maxWidth: '420px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+                animation: 'fadeInUp 0.25s ease',
+            }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '6px' }}>⭐</div>
+                    <h2 style={{ fontSize: '1.3rem', color: '#2c3e50', margin: 0 }}>Apna Review Dein</h2>
+                    <p style={{ color: '#888', fontSize: '13px', marginTop: '4px' }}>
+                        Order #{order._id.slice(-8).toUpperCase()} ke baare mein batayein
+                    </p>
+                    <div style={{ fontSize: '12px', color: '#aaa', marginTop: '4px' }}>
+                        {order.items.map(i => `${i.emoji} ${i.name}`).join(', ')}
+                    </div>
+                </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                    <p style={{ textAlign: 'center', fontWeight: 600, color: '#555', marginBottom: '0' }}>
+                        Khana kaisa laga?
+                    </p>
+                    <StarRating value={rating} onChange={setRating} />
+                    <p style={{ textAlign: 'center', fontSize: '13px', color: '#f39c12', minHeight: '18px' }}>
+                        {rating === 1 ? 'Bahut bura 😞' : rating === 2 ? 'Theek nahi tha 😕' : rating === 3 ? 'Theek tha 🙂' : rating === 4 ? 'Bahut acha tha 😊' : rating === 5 ? 'Ekdum zabardast! 🤩' : ''}
+                    </p>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                    <textarea
+                        value={comment}
+                        onChange={e => setComment(e.target.value)}
+                        placeholder="Koi bhi baat likhein — khane ki quality, service... (optional)"
+                        maxLength={500}
+                        rows={3}
+                        style={{
+                            width: '100%', borderRadius: '10px', border: '1.5px solid #ddd',
+                            padding: '10px 14px', fontSize: '14px', resize: 'vertical',
+                            fontFamily: 'inherit', boxSizing: 'border-box',
+                            outline: 'none', transition: 'border 0.2s',
+                        }}
+                        onFocus={e => e.target.style.border = '1.5px solid #8e44ad'}
+                        onBlur={e => e.target.style.border = '1.5px solid #ddd'}
+                    />
+                    <div style={{ textAlign: 'right', fontSize: '11px', color: '#aaa' }}>{comment.length}/500</div>
+                </div>
+
+                {error && (
+                    <div style={{
+                        background: '#fdecea', color: '#c0392b', borderRadius: '8px',
+                        padding: '8px 14px', fontSize: '13px', marginBottom: '14px', textAlign: 'center',
+                    }}>{error}</div>
+                )}
+
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #ddd',
+                            background: '#fff', color: '#555', fontWeight: 600, cursor: 'pointer', fontSize: '14px',
+                        }}
+                    >Baad mein</button>
+                    <button
+                        onClick={handleSubmit}
+                        disabled={loading || rating === 0}
+                        style={{
+                            flex: 2, padding: '12px', borderRadius: '10px', border: 'none',
+                            background: rating === 0 ? '#ccc' : 'linear-gradient(135deg, #8e44ad, #6c3483)',
+                            color: '#fff', fontWeight: 700, cursor: rating === 0 ? 'not-allowed' : 'pointer',
+                            fontSize: '14px', transition: 'all 0.2s',
+                        }}
+                    >
+                        {loading ? '⏳ Submit ho raha hai...' : '⭐ Review Submit Karein'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ── Order Card ─────────────────────────────────────────────────
+function OrderCard({ order, isReviewed, onReviewClick }) {
     const isCancelled = order.status === 'cancelled';
+    const isDone = order.status === 'done';
     const currentStep = STATUS_STEPS.indexOf(order.status);
     const info = STATUS_INFO[order.status] || STATUS_INFO.pending;
 
@@ -72,7 +206,7 @@ function OrderCard({ order }) {
                             {STATUS_STEPS.map((step, i) => {
                                 const stepInfo = STATUS_INFO[step];
                                 const isActive = i === currentStep;
-                                const isDone = i < currentStep;
+                                const isStepDone = i < currentStep;
                                 return (
                                     <React.Fragment key={step}>
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '64px' }}>
@@ -80,7 +214,7 @@ function OrderCard({ order }) {
                                                 width: '42px',
                                                 height: '42px',
                                                 borderRadius: '50%',
-                                                background: isDone ? '#27ae60' : isActive ? info.color : '#eee',
+                                                background: isStepDone ? '#27ae60' : isActive ? info.color : '#eee',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
@@ -88,13 +222,13 @@ function OrderCard({ order }) {
                                                 boxShadow: isActive ? `0 0 0 4px ${info.color}44` : 'none',
                                                 transition: 'all 0.3s ease',
                                             }}>
-                                                {isDone ? '✓' : stepInfo.emoji}
+                                                {isStepDone ? '✓' : stepInfo.emoji}
                                             </div>
                                             <div style={{
                                                 fontSize: '11px',
                                                 marginTop: '4px',
                                                 fontWeight: isActive ? 700 : 400,
-                                                color: isActive ? info.color : isDone ? '#27ae60' : '#aaa',
+                                                color: isActive ? info.color : isStepDone ? '#27ae60' : '#aaa',
                                                 textAlign: 'center',
                                             }}>
                                                 {stepInfo.label}
@@ -104,7 +238,7 @@ function OrderCard({ order }) {
                                             <div style={{
                                                 flex: 1,
                                                 height: '3px',
-                                                background: isDone ? '#27ae60' : '#eee',
+                                                background: isStepDone ? '#27ae60' : '#eee',
                                                 marginBottom: '18px',
                                                 transition: 'background 0.3s ease',
                                             }} />
@@ -161,6 +295,39 @@ function OrderCard({ order }) {
                         <span style={{ color: 'var(--primary-dark, #c0392b)' }}>₹{order.total}</span>
                     </div>
                 </div>
+
+                {/* Review Section — only for 'done' orders */}
+                {isDone && (
+                    <div style={{ marginTop: '16px', borderTop: '1px solid #f0f0f0', paddingTop: '16px' }}>
+                        {isReviewed ? (
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: '8px',
+                                background: '#f3e5f5', borderRadius: '10px',
+                                padding: '10px 16px', color: '#8e44ad', fontWeight: 600, fontSize: '14px',
+                            }}>
+                                <span style={{ fontSize: '18px' }}>✅</span>
+                                Aapne is order ka review de diya hai — Shukriya!
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => onReviewClick(order)}
+                                style={{
+                                    width: '100%', padding: '12px', borderRadius: '12px', border: 'none',
+                                    background: 'linear-gradient(135deg, #8e44ad, #6c3483)',
+                                    color: '#fff', fontWeight: 700, fontSize: '15px',
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center',
+                                    justifyContent: 'center', gap: '8px',
+                                    boxShadow: '0 4px 14px rgba(142,68,173,0.3)',
+                                    transition: 'transform 0.15s, box-shadow 0.15s',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 18px rgba(142,68,173,0.4)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(142,68,173,0.3)'; }}
+                            >
+                                ⭐ Apna Review Dein
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -170,6 +337,8 @@ export default function MyOrders() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(null);
+    const [reviewedOrderIds, setReviewedOrderIds] = useState([]);
+    const [reviewOrder, setReviewOrder] = useState(null); // order to be reviewed (modal)
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -185,12 +354,22 @@ export default function MyOrders() {
         }
     };
 
+    const fetchReviewedIds = async () => {
+        try {
+            const res = await axios.get('/reviews/my');
+            setReviewedOrderIds(res.data.reviewedOrderIds || []);
+        } catch (e) {
+            console.error('Error fetching reviews:', e);
+        }
+    };
+
     useEffect(() => {
         if (!user || user.role !== 'customer') {
             navigate('/login');
             return;
         }
         fetchOrders();
+        fetchReviewedIds();
         // Auto-refresh har 15 seconds mein
         const interval = setInterval(fetchOrders, 15000);
         return () => clearInterval(interval);
@@ -205,6 +384,18 @@ export default function MyOrders() {
 
     return (
         <div style={{ maxWidth: '700px', margin: '0 auto', padding: '20px' }}>
+            {/* Review Modal */}
+            {reviewOrder && (
+                <ReviewModal
+                    order={reviewOrder}
+                    onClose={() => setReviewOrder(null)}
+                    onSubmitted={() => {
+                        setReviewedOrderIds(prev => [...prev, reviewOrder._id]);
+                        setReviewOrder(null);
+                    }}
+                />
+            )}
+
             {/* Page Header */}
             <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                 <h1 style={{ fontSize: '2rem', color: 'var(--primary-dark, #c0392b)', marginBottom: '8px' }}>
@@ -273,7 +464,14 @@ export default function MyOrders() {
                     </button>
                 </div>
             ) : (
-                orders.map(order => <OrderCard key={order._id} order={order} />)
+                orders.map(order => (
+                    <OrderCard
+                        key={order._id}
+                        order={order}
+                        isReviewed={reviewedOrderIds.includes(order._id)}
+                        onReviewClick={setReviewOrder}
+                    />
+                ))
             )}
         </div>
     );
