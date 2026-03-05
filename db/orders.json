@@ -1,7 +1,160 @@
 [
   {
+    "id": "ORD-80371511",
+    "status": "done",
+    "timestamp": "2026-03-05T08:42:51.511986",
+    "dateStr": "05 Mar 2026, 08:42 AM",
+    "items": [
+      {
+        "name": "Veg Angara",
+        "nameHi": "व्हेज अंगारा",
+        "qty": 1,
+        "price": 200,
+        "emoji": "🔥"
+      },
+      {
+        "name": "Veg Tufani",
+        "nameHi": "व्हेज तुफाणी",
+        "qty": 1,
+        "price": 170,
+        "emoji": "🌪️"
+      },
+      {
+        "name": "Veg Pahad",
+        "nameHi": "व्हेज पहाड",
+        "qty": 1,
+        "price": 130,
+        "emoji": "🏔️"
+      }
+    ],
+    "total": 500,
+    "type": "dinein",
+    "table": "5"
+  },
+  {
+    "id": "ORD-79457607",
+    "status": "done",
+    "timestamp": "2026-03-05T08:27:37.607399",
+    "dateStr": "05 Mar 2026, 08:27 AM",
+    "items": [
+      {
+        "name": "Veg Angara",
+        "nameHi": "व्हेज अंगारा",
+        "qty": 1,
+        "price": 200,
+        "emoji": "🔥"
+      },
+      {
+        "name": "Veg Tufani",
+        "nameHi": "व्हेज तुफाणी",
+        "qty": 1,
+        "price": 170,
+        "emoji": "🌪️"
+      },
+      {
+        "name": "Veg Pahad",
+        "nameHi": "व्हेज पहाड",
+        "qty": 1,
+        "price": 130,
+        "emoji": "🏔️"
+      }
+    ],
+    "total": 500,
+    "type": "dinein",
+    "table": "5"
+  },
+  {
+    "id": "ORD-79419753",
+    "status": "done",
+    "timestamp": "2026-03-05T08:26:59.753988",
+    "dateStr": "05 Mar 2026, 08:26 AM",
+    "items": [
+      {
+        "name": "Veg Angara",
+        "nameHi": "व्हेज अंगारा",
+        "qty": 1,
+        "price": 200,
+        "emoji": "🔥"
+      },
+      {
+        "name": "Veg Tufani",
+        "nameHi": "व्हेज तुफाणी",
+        "qty": 1,
+        "price": 170,
+        "emoji": "🌪️"
+      },
+      {
+        "name": "Veg Pahad",
+        "nameHi": "व्हेज पहाड",
+        "qty": 1,
+        "price": 130,
+        "emoji": "🏔️"
+      },
+      {
+        "name": "Veg Hariyali",
+        "nameHi": "व्हेज हरियाली",
+        "qty": 1,
+        "price": 130,
+        "emoji": "🌿"
+      }
+    ],
+    "total": 630,
+    "type": "dinein",
+    "table": "5"
+  },
+  {
+    "id": "ORD-79316702",
+    "status": "done",
+    "timestamp": "2026-03-05T08:25:16.702670",
+    "dateStr": "05 Mar 2026, 08:25 AM",
+    "items": [
+      {
+        "name": "Veg Angara",
+        "nameHi": "व्हेज अंगारा",
+        "qty": 1,
+        "price": 200,
+        "emoji": "🔥"
+      },
+      {
+        "name": "Veg Tufani",
+        "nameHi": "व्हेज तुफाणी",
+        "qty": 1,
+        "price": 170,
+        "emoji": "🌪️"
+      },
+      {
+        "name": "Veg Hariyali",
+        "nameHi": "व्हेज हरियाली",
+        "qty": 1,
+        "price": 130,
+        "emoji": "🌿"
+      }
+    ],
+    "total": 500,
+    "type": "dinein",
+    "table": "5"
+  },
+  {
+    "id": "ORD-79180185",
+    "status": "done",
+    "timestamp": "2026-03-05T08:23:00.185774",
+    "dateStr": "05 Mar 2026, 08:23 AM",
+    "items": [
+      {
+        "name": "Veg Angara",
+        "nameHi": "व्हेज अंगारा",
+        "qty": 1,
+        "price": 200,
+        "emoji": "🔥"
+      }
+    ],
+    "total": 200,
+    "type": "dinein",
+    "table": "3"
+  },
+  {
     "id": "ORD-18781299",
-    "status": "preparing",
+    "status": "done",
     "timestamp": "2026-03-03T11:49:41.299316",
     "dateStr": "03 Mar 2026, 11:49 AM",
     "items": [
@@ -35,7 +188,7 @@
   },
   {
     "id": "ORD-77430242",
-    "status": "preparing",
+    "status": "done",
     "timestamp": "2026-03-03T00:20:30.242729",
     "dateStr": "03 Mar 2026, 12:20 AM",
     "items": [

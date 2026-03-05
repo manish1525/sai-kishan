@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import OwnerLogin from './pages/OwnerLogin';
 import OwnerDashboard from './pages/OwnerDashboard';
+import MyOrders from './pages/MyOrders';
 
 function Navbar() {
     const { user, logout } = React.useContext(AuthContext);
@@ -19,6 +20,7 @@ function Navbar() {
                             <span style={{ fontWeight: 600, color: 'var(--primary-dark)' }}>
                                 Hi, {user.name} ({user.role})
                             </span>
+                            {user.role === 'customer' && <Link to="/my-orders" className="btn btn-outline" style={{ padding: '6px 12px' }}>📦 My Orders</Link>}
                             {user.role === 'owner' && <Link to="/admin" className="btn btn-outline" style={{ padding: '6px 12px' }}>Dashboard</Link>}
                             <button onClick={logout} className="btn btn-logout" style={{ padding: '6px 12px' }}>Logout</button>
                         </>
@@ -53,6 +55,7 @@ function App() {
                     <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
                     <Route path="/owner-login" element={user?.role === 'owner' ? <Navigate to="/admin" /> : <OwnerLogin />} />
                     <Route path="/admin" element={<ProtectedOwner><OwnerDashboard /></ProtectedOwner>} />
+                    <Route path="/my-orders" element={<MyOrders />} />
                 </Routes>
             </div>
         </BrowserRouter>

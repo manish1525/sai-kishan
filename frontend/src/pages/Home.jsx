@@ -60,9 +60,9 @@ export default function Home() {
                 items: cart,
                 total
             });
-            alert(`🎉 Shukriya! Order Placed Successfully!\nOrder ID: ${res.data._id}`);
             setCart([]);
             setCartOpen(false);
+            navigate('/my-orders');
         } catch (e) {
             alert('Error placing order: ' + (e.response?.data?.error || e.message));
         }

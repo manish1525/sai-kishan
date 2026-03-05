@@ -20,6 +20,15 @@ router.get('/myorders', protect, customerOnly, async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── GET single order by ID (Customer - only their own order) ──
+router.get('/:id', protect, customerOnly, async (req, res) => {
+    try {
+        const order = await Order.findOne({ _id: req.params.id, customer: req.user._id });
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+        res.json(order);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ── POST new order (Customer) ─────────────────────────────────
 router.post('/', protect, customerOnly, async (req, res) => {
     try {

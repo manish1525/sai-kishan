@@ -226,20 +226,23 @@ async function placeOrder() {
         cart = [];
         updateCartUI();
         document.getElementById('cart-panel').classList.remove('open');
-        if (currentMode === 'dinein') {
-            showOrderTracker(resp.order);
-        } else {
-            showThankYou(resp.order);
+        if (currentMode === 'delivery') {
+            sendWhatsApp(items, total);
         }
+        // Show tracker for BOTH dine-in and delivery
+        showOrderTracker(resp.order);
     } else {
         showToast('Order failed, try again', 'error');
     }
 }
 
-// ── Order Status Tracker (Dine-In) ────────────────────────────
+// ── Order Status Tracker (Dine-In & Delivery) ─────────────────
 function showOrderTracker(order) {
     document.getElementById('tr-order-id').textContent = order.id;
-    document.getElementById('tr-type').textContent = order.type === 'dinein' ? `Dine-In (Table ${order.table})` : 'Home Delivery';
+    const typeLabel = order.type === 'dinein'
+        ? `🍽️ Dine-In (Table ${order.table})`
+        : `🛵 Delivery – ${order.address || window._deliveryInfo?.address || ''}`;
+    document.getElementById('tr-type').textContent = typeLabel;
     document.getElementById('tr-total').textContent = '₹' + order.total;
     document.getElementById('tr-items').textContent = order.items.map(i => `${i.name} ×${i.qty}`).join(', ');
 
@@ -249,7 +252,7 @@ function showOrderTracker(order) {
 
     updateTrackerUI('pending');
     if (trackingInterval) clearInterval(trackingInterval);
-    trackingInterval = setInterval(() => pollOrderStatus(order.id), 5000);
+    trackingInterval = setInterval(() => pollOrderStatus(order.id), 8000);
 }
 
 async function pollOrderStatus(orderId) {

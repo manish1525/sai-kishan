@@ -71,6 +71,7 @@ function loadTab(tab) {
 async function updateStats() {
     const s = await apiGet('/stats');
     document.getElementById('stat-pending').textContent = s.pending;
+    document.getElementById('stat-preparing').textContent = s.preparing;
     document.getElementById('stat-done').textContent = s.done_today;
     document.getElementById('stat-revenue').textContent = '₹' + s.revenue_today;
 }
@@ -85,12 +86,27 @@ async function updateBadge() {
 // ── Live Orders ───────────────────────────────────────────────
 async function renderOrders() {
     updateStats();
-    const orders = await apiGet('/orders?status=pending');
+    // Fetch all active orders (pending + preparing + ready)
+    const [pending, preparing, ready] = await Promise.all([
+        apiGet('/orders?status=pending'),
+        apiGet('/orders?status=preparing'),
+        apiGet('/orders?status=ready'),
+    ]);
+    const orders = [...pending, ...preparing, ...ready]
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
     const container = document.getElementById('orders-container');
     if (!orders.length) {
         container.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><p>No pending orders right now</p></div>`;
         return;
     }
+
+    const statusInfo = {
+        pending: { label: '⏳ Received', cls: 'tag-pending', color: '#f39c12' },
+        preparing: { label: '👨‍🍳 Preparing', cls: 'tag-preparing', color: '#2980b9' },
+        ready: { label: '🔔 Ready', cls: 'tag-ready', color: '#27ae60' },
+    };
+
     container.innerHTML = orders.map(o => {
         const tag = o.type === 'dinein'
             ? `<span class="tag tag-dinein">🍽️ Table ${o.table}</span>`
@@ -98,18 +114,31 @@ async function renderOrders() {
         const custInfo = o.type === 'delivery'
             ? `<div class="order-customer">👤 ${o.name || ''} &nbsp;|&nbsp; 📍 ${o.address || ''}</div>` : '';
         const items = (o.items || []).map(i => `<span class="order-item">${i.emoji || '🍽️'} ${i.name} ×${i.qty}</span>`).join('');
+
+        const si = statusInfo[o.status] || statusInfo.pending;
+        const statusBadge = `<span class="tag" style="background:${si.color}22;color:${si.color};border:1px solid ${si.color}44;">${si.label}</span>`;
+
+        // Smart next-step buttons based on current status
+        let actionBtns = '';
+        if (o.status === 'pending') {
+            actionBtns = `<button class="btn-preparing" onclick="markStatus('${o.id}','preparing')">👨‍🍳 Start Preparing</button>`;
+        } else if (o.status === 'preparing') {
+            actionBtns = `<button class="btn-ready" onclick="markStatus('${o.id}','ready')" style="background:#27ae60;color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:600;">🔔 Mark Ready</button>`;
+        } else if (o.status === 'ready') {
+            actionBtns = `<button class="btn-done" onclick="markStatus('${o.id}','done')">✅ Done / Delivered</button>`;
+        }
+
         return `<div class="order-card" id="ocard-${o.id}">
       <div class="order-card-header">
-        ${tag} <span class="order-id">${o.id}</span>
+        ${tag} ${statusBadge} <span class="order-id">${o.id}</span>
         <span class="order-time">🕐 ${o.dateStr || ''}</span>
       </div>
       ${custInfo}
       <div class="order-items-wrap">${items}</div>
       <div class="order-card-footer">
         <span class="order-total">₹${o.total}</span>
-        <div style="display:flex;gap:8px;">
-          <button class="btn-preparing" onclick="markStatus('${o.id}','preparing')">👨‍🍳 Preparing</button>
-          <button class="btn-done"      onclick="markStatus('${o.id}','done')">✅ Done</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          ${actionBtns}
           <button class="btn-del-order" onclick="deleteOrder('${o.id}')">🗑️</button>
         </div>
       </div>
@@ -128,8 +157,10 @@ async function markStatus(id, status) {
         renderOrders();
     }
     updateStats(); updateBadge();
-    showAdminToast(status === 'done' ? 'Order marked as done!' : 'Order is being prepared!');
+    const msgs = { preparing: '👨‍🍳 Preparing started!', ready: '🔔 Order marked Ready!', done: '✅ Order Done! Revenue updated.' };
+    showAdminToast(msgs[status] || 'Status updated!');
 }
+
 
 async function deleteOrder(id) {
     if (!confirm('Delete this order?')) return;
