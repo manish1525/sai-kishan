@@ -141,6 +141,36 @@
     </div>
   </div>
 
+  <!-- ══ PAYMENT MODAL ═════════════════════════════════════ -->
+  <div class="modal-backdrop hidden" id="payment-modal">
+    <div class="modal-box" style="text-align:center;">
+      <div class="modal-title">💳 Select Payment Mode</div>
+      <p class="modal-subtitle">How would you like to pay?</p>
+
+      <div id="payment-options" style="display:flex; gap:10px; margin-top:20px; justify-content:center;">
+        <button class="btn-secondary" style="flex:1;" onclick="selectPaymentMode('cash')">💵 Cash</button>
+        <button class="btn-primary" style="flex:1;" onclick="selectPaymentMode('online')">📱 Online / UPI</button>
+      </div>
+
+      <div id="upi-section" class="hidden" style="margin-top:20px;">
+        <h3 style="margin-bottom:10px; color:var(--text-dark);">Scan QR to Pay: ₹<span id="upi-amount">0</span></h3>
+        <div id="qr-code-container" style="background:white; padding:15px; border-radius:10px; display:inline-block; border: 2px solid var(--gold-dark);">
+            <img id="upi-qr" src="" alt="UPI QR Code" style="width: 200px; height: 200px;" />
+        </div>
+        <p style="margin-top:10px; font-size:14px; color:var(--text-muted);">UPI ID: <span id="hotel-upi-id">Loading...</span></p>
+        <div class="modal-actions" style="margin-top:20px;">
+            <button class="btn-secondary" onclick="resetPaymentMode()">Back</button>
+            <button class="btn-primary" onclick="confirmOrderWithPayment('online')">✅ I Have Paid</button>
+        </div>
+      </div>
+
+      <div class="modal-actions" id="payment-actions-cash" style="margin-top:20px;" class="hidden">
+        <button class="btn-secondary" onclick="closeModal('payment-modal')">Cancel</button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ══ ORDER STATUS TRACKER ═══════════════════════════════ -->
   <div class="order-tracker-overlay hidden" id="tracker-overlay">
     <div class="tracker-box">
