@@ -118,6 +118,11 @@ async function renderOrders() {
         const si = statusInfo[o.status] || statusInfo.pending;
         const statusBadge = `<span class="tag" style="background:${si.color}22;color:${si.color};border:1px solid ${si.color}44;">${si.label}</span>`;
 
+        // Payment Mode Badge
+        const paymentBadge = o.payment_mode === 'online' 
+            ? `<span class="tag" style="background:#8e44ad22;color:#8e44ad;border:1px solid #8e44ad44;">📱 Online Paid</span>`
+            : (o.payment_mode === 'cash' ? `<span class="tag" style="background:#16a08522;color:#16a085;border:1px solid #16a08544;">💵 Cash</span>` : '');
+
         // Smart next-step buttons based on current status
         let actionBtns = '';
         if (o.status === 'pending') {
@@ -136,7 +141,10 @@ async function renderOrders() {
       ${custInfo}
       <div class="order-items-wrap">${items}</div>
       <div class="order-card-footer">
-        <span class="order-total">₹${o.total}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="order-total">₹${o.total}</span>
+          ${paymentBadge}
+        </div>
         <div style="display:flex;gap:8px;align-items:center;">
           ${actionBtns}
           <button class="btn-del-order" onclick="deleteOrder('${o.id}')">🗑️</button>
@@ -181,9 +189,15 @@ async function renderHistory() {
             ? `<span class="tag tag-dinein">🍽️ Table ${o.table}</span>`
             : `<span class="tag tag-delivery">🛵 ${o.name || 'Delivery'}</span>`;
         const items = (o.items || []).map(i => `${i.emoji || '🍽️'} ${i.name} ×${i.qty}`).join(', ');
+
+        const paymentBadge = o.payment_mode === 'online' 
+            ? `<span class="tag" style="background:#8e44ad22;color:#8e44ad;border:1px solid #8e44ad44;font-size:11px;">📱 Online</span>`
+            : (o.payment_mode === 'cash' ? `<span class="tag" style="background:#16a08522;color:#16a085;border:1px solid #16a08544;font-size:11px;">💵 Cash</span>` : '');
+
         return `<div class="history-row">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
         ${tag} <span style="font-size:12px;color:var(--text-muted);">${o.id}</span>
+        ${paymentBadge}
         <span class="tag tag-done" style="margin-left:auto;">✅ Done</span>
       </div>
       <div class="history-items">${items}</div>

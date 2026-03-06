@@ -241,6 +241,12 @@ function selectPaymentMode(mode) {
         const upiString = `upi://pay?pa=${window._hotelUpiId}&pn=${encodeURIComponent(businessName)}&am=${total}&cu=INR`;
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiString)}`;
         document.getElementById('upi-qr').src = qrUrl;
+
+        // Set Deep Links
+        document.getElementById('pay-gpay').href = upiString;
+        document.getElementById('pay-phonepe').href = `phonepe://pay?pa=${window._hotelUpiId}&pn=${encodeURIComponent(businessName)}&am=${total}&cu=INR`;
+        document.getElementById('pay-paytm').href = `paytmmp://pay?pa=${window._hotelUpiId}&pn=${encodeURIComponent(businessName)}&am=${total}&cu=INR`;
+
     }
 }
 

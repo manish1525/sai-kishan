@@ -158,6 +158,13 @@
             <img id="upi-qr" src="" alt="UPI QR Code" style="width: 200px; height: 200px;" />
         </div>
         <p style="margin-top:10px; font-size:14px; color:var(--text-muted);">UPI ID: <span id="hotel-upi-id">Loading...</span></p>
+
+        <div id="upi-deep-links" style="display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap:wrap;">
+            <a id="pay-gpay" href="#" class="btn-secondary" style="flex:1; padding:8px; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px;"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style="height:18px;"> GPay</a>
+            <a id="pay-phonepe" href="#" class="btn-secondary" style="flex:1; padding:8px; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px;"><img src="https://cdn.simpleicons.org/phonepe/5f258f" style="height:18px;"> PhonePe</a>
+            <a id="pay-paytm" href="#" class="btn-secondary" style="flex:1; padding:8px; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px;"><img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" style="height:18px;"> Paytm</a>
+        </div>
+
         <div class="modal-actions" style="margin-top:20px;">
             <button class="btn-secondary" onclick="resetPaymentMode()">Back</button>
             <button class="btn-primary" onclick="confirmOrderWithPayment('online')">✅ I Have Paid</button>
