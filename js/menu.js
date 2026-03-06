@@ -13,12 +13,18 @@ let trackingInterval = null;
 
 // ── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-    // Load address from settings
+    // Load address and UPI from settings
     try {
         const s = await apiGet('/settings');
         if (s.hotel_address) document.getElementById('hotel-address-text').textContent = s.hotel_address;
         if (s.hotel_phone) document.getElementById('hotel-phone-text').textContent = s.hotel_phone;
-    } catch (e) { document.getElementById('hotel-address-text').textContent = '9665843401'; }
+        window._hotelUpiId = s.upi_id || 'example@ybl'; // Default fallback
+        const upiEl = document.getElementById('hotel-upi-id');
+        if (upiEl) upiEl.textContent = window._hotelUpiId;
+    } catch (e) { 
+        document.getElementById('hotel-address-text').textContent = '9665843401';
+        window._hotelUpiId = 'example@ybl';
+    }
 
     fullMenu = await apiGet('/menu');
     document.getElementById('mode-section').classList.remove('hidden');
@@ -208,17 +214,55 @@ function updateCartUI() {
 function toggleCartPanel() { document.getElementById('cart-panel').classList.toggle('open'); }
 
 // ── Place Order ───────────────────────────────────────────────
-async function placeOrder() {
+function placeOrder() {
     if (cart.length === 0) { showToast('Cart is empty!', 'error'); return; }
+    // Show payment modal instead of calculating API call directly
+    const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    document.getElementById('upi-amount').textContent = total;
+    document.getElementById('payment-modal').classList.remove('hidden');
+    
+    // Reset modal state
+    resetPaymentMode();
+}
+
+function selectPaymentMode(mode) {
+    if (mode === 'cash') {
+        confirmOrderWithPayment('cash');
+    } else if (mode === 'online') {
+        document.getElementById('payment-options').style.display = 'none';
+        document.getElementById('upi-section').style.display = 'block';
+        document.getElementById('upi-section').classList.remove('hidden');
+        document.getElementById('payment-actions-cash').style.display = 'none';
+        
+        // Generate UPI QR Code URL
+        const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+        // Using a public QR generator API that accepts UPI string
+        const businessName = "Hotel New Kishan";
+        const upiString = `upi://pay?pa=${window._hotelUpiId}&pn=${encodeURIComponent(businessName)}&am=${total}&cu=INR`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiString)}`;
+        document.getElementById('upi-qr').src = qrUrl;
+    }
+}
+
+function resetPaymentMode() {
+    document.getElementById('payment-options').style.display = 'flex';
+    document.getElementById('upi-section').style.display = 'none';
+    document.getElementById('upi-section').classList.add('hidden');
+    document.getElementById('payment-actions-cash').style.display = 'block';
+}
+
+async function confirmOrderWithPayment(paymentMode) {
+    document.getElementById('payment-modal').classList.add('hidden');
+    
     const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const items = cart.map(i => ({ name: i.name, nameHi: i.nameHi || '', qty: i.qty, price: i.price, emoji: i.emoji || '🍽️' }));
 
-    let body = { items, total };
+    let body = { items, total, payment_mode: paymentMode };
     if (currentMode === 'dinein') {
         body = { ...body, type: 'dinein', table: window._tableNo };
     } else {
         body = { ...body, type: 'delivery', ...window._deliveryInfo };
-        sendWhatsApp(items, total);
+        sendWhatsApp(items, total, paymentMode);
     }
 
     const resp = await apiPost('/orders', body);
@@ -227,7 +271,7 @@ async function placeOrder() {
         updateCartUI();
         document.getElementById('cart-panel').classList.remove('open');
         if (currentMode === 'delivery') {
-            sendWhatsApp(items, total);
+            sendWhatsApp(items, total, paymentMode);
         }
         // Show tracker for BOTH dine-in and delivery
         showOrderTracker(resp.order);
@@ -306,10 +350,11 @@ function closeTracker() {
 }
 
 // ── Thank You (Delivery) ──────────────────────────────────────
-function sendWhatsApp(items, total) {
+function sendWhatsApp(items, total, paymentMode) {
     const info = window._deliveryInfo;
     const lines = items.map(i => `  • ${i.name} ×${i.qty} - ₹${i.price * i.qty}`).join('\n');
-    const msg = `🍽️ *Hotel New Kishan – New Order*\n👤 *Name:* ${info.name}\n📞 *Phone:* ${info.phone || 'N/A'}\n📍 *Address:* ${info.address}\n\n📋 *Items:*\n${lines}\n\n💰 *Total: ₹${total}*\n⏰ ${new Date().toLocaleString('en-IN')}\n\n_Order placed via Hotel New Kishan App_`;
+    const pMode = paymentMode === 'online' ? 'Online (UPI paid)' : 'Cash on Delivery';
+    const msg = `🍽️ *Hotel New Kishan – New Order*\n👤 *Name:* ${info.name}\n📞 *Phone:* ${info.phone || 'N/A'}\n📍 *Address:* ${info.address}\n💳 *Payment:* ${pMode}\n\n📋 *Items:*\n${lines}\n\n💰 *Total: ₹${total}*\n⏰ ${new Date().toLocaleString('en-IN')}\n\n_Order placed via Hotel New Kishan App_`;
     setTimeout(() => window.open('https://wa.me/919665843401?text=' + encodeURIComponent(msg), '_blank'), 500);
 }
 
