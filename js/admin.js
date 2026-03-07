@@ -331,18 +331,40 @@ async function loadSettings() {
     if (s.hotel_phone) document.getElementById('set-phone').value = s.hotel_phone;
     if (s.owner_name) document.getElementById('set-owner').value = s.owner_name;
     if (s.upi_id) document.getElementById('set-upi').value = s.upi_id;
-}
-
+} 
 async function saveHotelInfo() {
+
     const address = document.getElementById('set-address').value.trim();
     const phone = document.getElementById('set-phone').value.trim();
     const name = document.getElementById('set-owner').value.trim();
     const upi = document.getElementById('set-upi').value.trim();
+
     try {
-        await apiPut('/settings/owner', { name, hotel_address: address, hotel_phone: phone, upi_id: upi });
-        if (name) document.getElementById('owner-name-display').textContent = 'Owner: ' + name;
+
+        // Save hotel + owner info
+        await apiPut('/settings/owner', {
+            name: name,
+            hotel_address: address,
+            hotel_phone: phone
+        });
+
+        // Save UPI separately
+        if (upi) {
+            await apiPut('/settings/upi', {
+                upi_id: upi
+            });
+        }
+
+        if (name) {
+            document.getElementById('owner-name-display').textContent = 'Owner: ' + name;
+        }
+
         showAdminToast('Hotel info saved! ✅');
-    } catch (e) { showAdminToast('Save failed', 'error'); }
+
+    } catch (e) {
+        showAdminToast('Save failed', 'error');
+    }
+
 }
 
 async function changePassword() {
