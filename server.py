@@ -303,7 +303,7 @@ def get_stats():
 
 if __name__ == '__main__':
     s = get_settings()
-
+    
     print("=" * 55)
     print("Hotel New Kishan - Server Starting...")
     print("Owner:", s.get('owner_name', 'Mr. Kuldip Khairnar'))
