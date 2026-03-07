@@ -251,6 +251,36 @@
 
   <script src="js/api.js"></script>
   <script src="js/menu.js"></script>
+
+  <script>
+async function loadHotelSettings() {
+  try {
+    const res = await fetch("/api/settings");
+    const data = await res.json();
+
+    // Address
+    if (data.hotel_address) {
+      document.getElementById("hotel-address-text").textContent = data.hotel_address;
+    }
+
+    // Phone
+    if (data.hotel_phone) {
+      document.getElementById("hotel-phone-text").textContent = data.hotel_phone;
+    }
+
+    // UPI ID
+    if (data.upi_id) {
+      document.getElementById("hotel-upi-id").textContent = data.upi_id;
+      window.hotelUpiId = data.upi_id;
+    }
+
+  } catch (err) {
+    console.error("Failed to load hotel settings", err);
+  }
+}
+
+loadHotelSettings();
+</script>
 </body>
 
 </html>
