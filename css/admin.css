@@ -29,6 +29,14 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
 }
 
 body {
