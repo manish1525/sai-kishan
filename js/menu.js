@@ -218,7 +218,6 @@ async function placeOrder() {
         body = { ...body, type: 'dinein', table: window._tableNo };
     } else {
         body = { ...body, type: 'delivery', ...window._deliveryInfo };
-        sendWhatsApp(items, total);
     }
 
     const resp = await apiPost('/orders', body);

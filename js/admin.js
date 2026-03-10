@@ -29,6 +29,7 @@ async function showDashboard() {
         if (s.hotel_address) document.getElementById('set-address').value = s.hotel_address;
         if (s.hotel_phone) document.getElementById('set-phone').value = s.hotel_phone;
         if (s.owner_name) document.getElementById('set-owner').value = s.owner_name;
+        if (s.upi_id !== undefined) document.getElementById('set-upi').value = s.upi_id;
     } catch (e) { }
 
     loadTab('orders');
@@ -38,14 +39,23 @@ async function showDashboard() {
 
 async function adminLogin() {
     const pwd = document.getElementById('admin-pwd').value;
+    const errEl = document.getElementById('login-error');
+    errEl.textContent = '';
     try {
-        const res = await apiPost('/auth/login', { password: pwd });
-        if (res.success) {
+        const r = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: pwd })
+        });
+        const res = await r.json();
+        if (r.ok && res.success) {
             sessionStorage.setItem('nkAdmin', '1');
             showDashboard();
+        } else {
+            errEl.textContent = '❌ ' + (res.error || 'Wrong password!');
         }
     } catch (e) {
-        document.getElementById('login-error').textContent = '❌ Wrong password!';
+        errEl.textContent = '❌ Server error. Try again.';
     }
 }
 
@@ -316,14 +326,16 @@ async function loadSettings() {
     if (s.hotel_address) document.getElementById('set-address').value = s.hotel_address;
     if (s.hotel_phone) document.getElementById('set-phone').value = s.hotel_phone;
     if (s.owner_name) document.getElementById('set-owner').value = s.owner_name;
+    if (s.upi_id !== undefined) document.getElementById('set-upi').value = s.upi_id;
 }
 
 async function saveHotelInfo() {
     const address = document.getElementById('set-address').value.trim();
-    const phone = document.getElementById('set-phone').value.trim();
-    const name = document.getElementById('set-owner').value.trim();
+    const phone   = document.getElementById('set-phone').value.trim();
+    const name    = document.getElementById('set-owner').value.trim();
+    const upi     = document.getElementById('set-upi').value.trim();
     try {
-        await apiPut('/settings/owner', { name, hotel_address: address, hotel_phone: phone });
+        await apiPut('/settings/owner', { name, hotel_address: address, hotel_phone: phone, upi_id: upi });
         if (name) document.getElementById('owner-name-display').textContent = 'Owner: ' + name;
         showAdminToast('Hotel info saved! ✅');
     } catch (e) { showAdminToast('Save failed', 'error'); }
