@@ -8,20 +8,31 @@ let currentType = 'veg';
 let currentMode = null;
 let fullMenu = [];
 let trackingInterval = null;
+let siteUpiId = '';          // loaded from settings
+let _pendingOrderBody = null; // holds order while payment modal is open
 
 
 
 // ── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-    // Load address from settings
+    // Load settings
     try {
         const s = await apiGet('/settings');
         if (s.hotel_address) document.getElementById('hotel-address-text').textContent = s.hotel_address;
         if (s.hotel_phone) document.getElementById('hotel-phone-text').textContent = s.hotel_phone;
+        // Store UPI ID for payment
+        siteUpiId = s.upi_id || '';
+        if (siteUpiId) {
+            document.getElementById('upi-id-label').textContent = siteUpiId;
+            document.getElementById('upi-pay-section').style.display = 'block';
+        } else {
+            document.getElementById('upi-pay-section').style.display = 'none';
+        }
     } catch (e) { document.getElementById('hotel-address-text').textContent = '9665843401'; }
 
     fullMenu = await apiGet('/menu');
     document.getElementById('mode-section').classList.remove('hidden');
+    // Set cash label based on mode
 });
 
 // ── Mode ──────────────────────────────────────────────────────
@@ -208,7 +219,7 @@ function updateCartUI() {
 function toggleCartPanel() { document.getElementById('cart-panel').classList.toggle('open'); }
 
 // ── Place Order ───────────────────────────────────────────────
-async function placeOrder() {
+function placeOrder() {
     if (cart.length === 0) { showToast('Cart is empty!', 'error'); return; }
     const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const items = cart.map(i => ({ name: i.name, nameHi: i.nameHi || '', qty: i.qty, price: i.price, emoji: i.emoji || '🍽️' }));
@@ -220,19 +231,62 @@ async function placeOrder() {
         body = { ...body, type: 'delivery', ...window._deliveryInfo };
     }
 
+    _pendingOrderBody = body;
+
+    // Show payment modal
+    document.getElementById('pay-order-label').textContent = 'Order Total: ₹' + total;
+    // Update cash label based on order type
+    const cashLbl = document.getElementById('cash-label');
+    const cashSub = document.getElementById('cash-sub-label');
+    if (currentMode === 'dinein') {
+        cashLbl.textContent = 'Pay Cash';
+        cashSub.textContent = 'Pay at the counter after eating';
+    } else {
+        cashLbl.textContent = 'Cash on Delivery';
+        cashSub.textContent = 'Pay cash when order arrives';
+    }
+    // Show/hide UPI based on whether admin has set UPI ID
+    document.getElementById('upi-pay-section').style.display = siteUpiId ? 'block' : 'none';
+    document.getElementById('payment-modal').classList.remove('hidden');
+}
+
+// ── Payment Handlers ──────────────────────────────────────────
+function payViaUPI() {
+    if (!siteUpiId) { showToast('UPI not available', 'error'); return; }
+    const total = _pendingOrderBody.total;
+    const name  = encodeURIComponent('Hotel New Kishan');
+    const note  = encodeURIComponent('Food Order Payment');
+    // UPI deep link – opens GPay / PhonePe / Paytm
+    const upiLink = `upi://pay?pa=${encodeURIComponent(siteUpiId)}&pn=${name}&am=${total}&cu=INR&tn=${note}`;
+    window.open(upiLink, '_blank');
+    // Place order with payment method = upi
+    _submitOrder({ ..._pendingOrderBody, paymentMethod: 'upi' });
+}
+
+function payCash() {
+    _submitOrder({ ..._pendingOrderBody, paymentMethod: 'cash' });
+}
+
+function closePaymentModal() {
+    document.getElementById('payment-modal').classList.add('hidden');
+    _pendingOrderBody = null;
+}
+
+async function _submitOrder(body) {
+    document.getElementById('payment-modal').classList.add('hidden');
     const resp = await apiPost('/orders', body);
     if (resp.success) {
         cart = [];
         updateCartUI();
         document.getElementById('cart-panel').classList.remove('open');
         if (currentMode === 'delivery') {
-            sendWhatsApp(items, total);
+            sendWhatsApp(body.items, body.total);
         }
-        // Show tracker for BOTH dine-in and delivery
         showOrderTracker(resp.order);
     } else {
         showToast('Order failed, try again', 'error');
     }
+    _pendingOrderBody = null;
 }
 
 // ── Order Status Tracker (Dine-In & Delivery) ─────────────────

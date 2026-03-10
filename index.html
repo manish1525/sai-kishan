@@ -212,6 +212,33 @@
     </div>
   </div>
 
+  <!-- ══ UPI PAYMENT MODAL ════════════════════════════════ -->
+  <div class="modal-backdrop hidden" id="payment-modal">
+    <div class="modal-box" style="max-width:400px;text-align:center;">
+      <div style="font-size:48px;margin-bottom:8px;">💳</div>
+      <div class="modal-title" style="font-size:22px;">Choose Payment</div>
+      <p class="modal-subtitle" id="pay-order-label">Order Total: ₹0</p>
+
+      <!-- UPI Option -->
+      <div id="upi-pay-section">
+        <div style="background:var(--gold-bg);border:2px solid var(--gold);border-radius:16px;padding:20px;margin-bottom:16px;cursor:pointer;" onclick="payViaUPI()">
+          <div style="font-size:32px;margin-bottom:6px;">📲</div>
+          <div style="font-weight:700;font-size:16px;color:var(--gold-dark);">Pay via UPI</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;" id="upi-id-label">GPay / PhonePe / Paytm</div>
+        </div>
+      </div>
+
+      <!-- Cash Option -->
+      <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:16px;padding:20px;cursor:pointer;" onclick="payCash()">
+        <div style="font-size:32px;margin-bottom:6px;">💵</div>
+        <div style="font-weight:700;font-size:16px;color:#15803d;" id="cash-label">Pay Cash</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;" id="cash-sub-label">Pay at counter / on delivery</div>
+      </div>
+
+      <button class="btn-secondary" onclick="closePaymentModal()" style="width:100%;margin-top:16px;">✕ Cancel Order</button>
+    </div>
+  </div>
+
   <script src="js/api.js"></script>
   <script src="js/menu.js"></script>
 </body>
